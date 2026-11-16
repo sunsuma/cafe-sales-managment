@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Cafe Sales Manager",
+    "slug": "cafe-sales-manager",
+    "scheme": "cafesales",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      "expo-image-picker",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F8F5F0"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ffee58c8-94bb-4a59-aa5c-a4097818a56c"
+      }
+    }
+  }
+}
