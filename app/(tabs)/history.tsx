@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { router } from "expo-router";
-import { Screen, Heading, Card, Pill, s } from "../../src/components/ui";
+import { TabScreen, Heading, Card, Pill, s } from "../../src/components/ui";
 import { useCafeStore } from "../../src/store/useCafeStore";
 import { money } from "../../src/utils/currency";
 import { C } from "../../src/constants/colors";
@@ -33,7 +33,7 @@ export default function History() {
   };
 
   return (
-    <Screen>
+    <TabScreen>
       <Heading title="Order history" sub={`${orders.length} total orders`} />
       <TextInput
         value={q}
@@ -72,7 +72,7 @@ export default function History() {
           </TouchableOpacity>
         ))}
       </View>
-      <ScrollView>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         {list.map((o) => {
           const createdDate = o.createdAt ? new Date(o.createdAt) : null;
           const safeDate = createdDate && !Number.isNaN(createdDate.getTime()) ? createdDate.toLocaleString("en-IN") : "Unknown date";
@@ -85,6 +85,17 @@ export default function History() {
                     <Text style={{ fontWeight: "800", color: C.text }}>
                       {o.orderNumber ?? "Unknown order"}
                     </Text>
+                    {!!o.description?.trim() && (
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          color: C.dark,
+                          marginTop: 3,
+                        }}
+                      >
+                        {o.description.trim()}
+                      </Text>
+                    )}
                     <Text style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>
                       {safeDate}
                     </Text>
@@ -109,6 +120,6 @@ export default function History() {
           </Card>
         )}
       </ScrollView>
-    </Screen>
+    </TabScreen>
   );
 }

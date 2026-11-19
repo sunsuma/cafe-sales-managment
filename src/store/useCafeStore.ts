@@ -17,8 +17,8 @@ type State = {
   addItem: (x: Omit<MenuItem, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateItem: (id: string, x: Partial<MenuItem>) => void;
   deleteItem: (id: string) => void;
-  createOrder: (items: OrderItem[]) => Order;
-  updateOrder: (id: string, items: OrderItem[], status: PaymentStatus) => void;
+  createOrder: (items: OrderItem[], description?: string) => Order;
+  updateOrder: (id: string, items: OrderItem[], status: PaymentStatus, description?: string) => void;
   setStatus: (id: string, status: PaymentStatus) => void;
   deleteOrder: (id: string) => void;
   setSettings: (x: Partial<CafeSettings>) => void;
@@ -55,13 +55,14 @@ export const useCafeStore = create<State>()(
         set((s) => ({
           items: s.items.filter((i) => i.id !== id),
         })),
-      createOrder: (items) => {
+      createOrder: (items, description) => {
         const now = new Date().toISOString();
         const s = get();
         const orderNumber = makeOrderNumber(s.orders.map((o) => o.orderNumber));
         const order: Order = {
           id: `ord-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           orderNumber,
+          description: description?.trim() || undefined,
           items,
           totalQuantity: items.reduce((a, b) => a + b.quantity, 0),
           totalAmount: items.reduce((a, b) => a + b.subtotal, 0),
@@ -73,13 +74,14 @@ export const useCafeStore = create<State>()(
         set((v) => ({ orders: [order, ...v.orders] }));
         return order;
       },
-      updateOrder: (id, items, status) =>
+      updateOrder: (id, items, status, description) =>
         set((s) => ({
           orders: s.orders.map((o) => {
             if (o.id !== id) return o;
             const now = new Date().toISOString();
             return {
               ...o,
+              description: description?.trim() ?? o.description,
               items,
               totalQuantity: items.reduce((a, b) => a + b.quantity, 0),
               totalAmount: items.reduce((a, b) => a + b.subtotal, 0),

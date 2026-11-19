@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { Screen, Heading, Card, Btn, s } from '../../../src/components/ui';
+import { Screen, Heading, Card, Btn, Field, s } from '../../../src/components/ui';
 import { useCafeStore } from '../../../src/store/useCafeStore';
 import { OrderItem } from '../../../src/types/models';
 import { money } from '../../../src/utils/currency';
@@ -15,6 +15,7 @@ export default function EditOrder() {
 
   const [lines, setLines] = useState<OrderItem[]>(() => order?.items ?? []);
   const [status, setStatus] = useState(() => order?.paymentStatus ?? 'PENDING');
+  const [description, setDescription] = useState(() => order?.description ?? '');
   const total = useMemo(() => lines.reduce((a, b) => a + b.subtotal, 0), [lines]);
 
   if (!order) {
@@ -48,7 +49,7 @@ export default function EditOrder() {
       Alert.alert('Order needs an item');
       return;
     }
-    update(currentOrder.id, lines, status);
+    update(currentOrder.id, lines, status, description);
     router.back();
   }
 
@@ -56,6 +57,12 @@ export default function EditOrder() {
     <Screen>
       <ScrollView>
         <Heading title="Edit order" sub={order.orderNumber} />
+        <Field
+          label="ORDER DESCRIPTION (OPTIONAL)"
+          value={description}
+          onChangeText={setDescription}
+          placeholder="e.g. Table 4 or customer name"
+        />
         <Card>
           <Text style={{ fontWeight: '800', color: C.text, marginBottom: 10 }}>Current order items</Text>
           {lines.map((x) => (

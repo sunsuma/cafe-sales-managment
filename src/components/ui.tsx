@@ -8,9 +8,17 @@ import {
   ViewStyle,
   TextStyle,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { C } from "../constants/colors";
 export function Screen({ children }: { children: React.ReactNode }) {
   return <View style={s.screen}>{children}</View>;
+}
+export function TabScreen({ children }: { children: React.ReactNode }) {
+  return (
+    <SafeAreaView style={s.screen} edges={["top"]}>
+      {children}
+    </SafeAreaView>
+  );
 }
 export function Heading({ title, sub }: { title: string; sub?: string }) {
   return (

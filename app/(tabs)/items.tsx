@@ -1,14 +1,14 @@
 import React from "react";
 import { ScrollView, View, Text, TouchableOpacity, Alert } from "react-native";
 import { router } from "expo-router";
-import { Screen, Heading, Card, Btn, s } from "../../src/components/ui";
+import { TabScreen, Heading, Card, Btn, s } from "../../src/components/ui";
 import { useCafeStore } from "../../src/store/useCafeStore";
 import { money } from "../../src/utils/currency";
 import { C } from "../../src/constants/colors";
 export default function Items() {
   const { items, deleteItem } = useCafeStore();
   return (
-    <Screen>
+    <TabScreen>
       <View style={s.row}>
         <Heading
           title="Menu items"
@@ -22,7 +22,7 @@ export default function Items() {
         title="＋  Create New Order"
         onPress={() => router.push("/orders/create")}
       />
-      <ScrollView style={{ marginTop: 15 }}>
+      <ScrollView style={{ flex: 1, marginTop: 15 }}>
         {items.map((i) => (
           <Card key={i.id}>
             <View style={s.row}>
@@ -80,6 +80,6 @@ export default function Items() {
           </Card>
         )}
       </ScrollView>
-    </Screen>
+    </TabScreen>
   );
 }

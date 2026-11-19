@@ -1,35 +1,47 @@
 {
   "expo": {
-    "name": "Cafe Sales Manager",
+    "name": "ARBO's Cafe",
     "slug": "cafe-sales-manager",
     "scheme": "cafesales",
+    "icon": "./assets/icon.png",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "plugins": [
-      "expo-router",
-      "expo-image-picker",
-      "expo-font"
-    ],
+    "splash": {
+      "backgroundColor": "#F40808"
+    },
+    "plugins": ["expo-router", "expo-image-picker", "expo-font", "expo-asset"],
     "experiments": {
       "typedRoutes": true
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/icon.png",
+      "splash": {
+        "backgroundColor": "#F40808"
+      }
     },
     "android": {
+      "icon": "./assets/icon.png",
       "adaptiveIcon": {
-        "backgroundColor": "#F8F5F0"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F6F0E7"
       },
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "splash": {
+        "backgroundColor": "#F40808"
+      },
+      "permissions": ["android.permission.RECORD_AUDIO"],
+      "package": "com.sunsuma.cafesalesmanager"
     },
     "extra": {
       "router": {},
       "eas": {
         "projectId": "ffee58c8-94bb-4a59-aa5c-a4097818a56c"
       }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/ffee58c8-94bb-4a59-aa5c-a4097818a56c"
     }
   }
 }

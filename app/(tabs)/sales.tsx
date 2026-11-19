@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { ScrollView, View, Text, TouchableOpacity, Alert } from "react-native";
-import { Screen, Heading, Card, Btn, s } from "../../src/components/ui";
+import { TabScreen, Heading, Card, Btn, s } from "../../src/components/ui";
 import { useCafeStore } from "../../src/store/useCafeStore";
 import { money } from "../../src/utils/currency";
 import {
@@ -34,66 +34,66 @@ export default function Sales() {
         ? "Week of " + date.toLocaleDateString("en-IN")
         : date.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
   return (
-    <Screen>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Heading title="Sales overview" sub="Track your café performance" />
-        <View style={{ flexDirection: "row", gap: 6, marginBottom: 14 }}>
-          {(["Daily", "Weekly", "Monthly"] as const).map((p) => (
-            <TouchableOpacity
-              key={p}
-              onPress={() => {
-                setPeriod(p);
-                setOffset(0);
-              }}
-              style={{
-                flex: 1,
-                padding: 11,
-                borderRadius: 10,
-                backgroundColor: period === p ? C.green : C.secondary,
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: period === p ? C.white : C.muted,
-                  fontWeight: "700",
-                }}
-              >
-                {p}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <Card>
-          <View style={s.row}>
-            <TouchableOpacity onPress={() => setOffset((x) => x - 1)}>
-              <Text style={{ fontSize: 20, color: C.green }}>‹</Text>
-            </TouchableOpacity>
+    <TabScreen>
+      <Heading title="Sales overview" sub="Track your café performance" />
+      <View style={{ flexDirection: "row", gap: 6, marginBottom: 14 }}>
+        {(["Daily", "Weekly", "Monthly"] as const).map((p) => (
+          <TouchableOpacity
+            key={p}
+            onPress={() => {
+              setPeriod(p);
+              setOffset(0);
+            }}
+            style={{
+              flex: 1,
+              padding: 11,
+              borderRadius: 10,
+              backgroundColor: period === p ? C.green : C.secondary,
+              alignItems: "center",
+            }}
+          >
             <Text
               style={{
+                color: period === p ? C.white : C.muted,
                 fontWeight: "700",
-                color: C.text,
-                flex: 1,
-                textAlign: "center",
               }}
             >
-              {label}
+              {p}
             </Text>
-            <TouchableOpacity
-              onPress={() => setOffset((x) => Math.min(0, x + 1))}
-              disabled={offset === 0}
+          </TouchableOpacity>
+        ))}
+      </View>
+      <Card>
+        <View style={s.row}>
+          <TouchableOpacity onPress={() => setOffset((x) => x - 1)}>
+            <Text style={{ fontSize: 20, color: C.green }}>‹</Text>
+          </TouchableOpacity>
+          <Text
+            style={{
+              fontWeight: "700",
+              color: C.text,
+              flex: 1,
+              textAlign: "center",
+            }}
+          >
+            {label}
+          </Text>
+          <TouchableOpacity
+            onPress={() => setOffset((x) => Math.min(0, x + 1))}
+            disabled={offset === 0}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                color: offset === 0 ? C.faint : C.green,
+              }}
             >
-              <Text
-                style={{
-                  fontSize: 20,
-                  color: offset === 0 ? C.faint : C.green,
-                }}
-              >
-                ›
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </Card>
+              ›
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Card>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <Card style={{ backgroundColor: C.green, borderColor: C.green }}>
           <Text style={{ color: "#D7EBDD" }}>TOTAL PAID SALES</Text>
           <Text
@@ -191,6 +191,6 @@ export default function Sales() {
           </View>
         </View>
       </ScrollView>
-    </Screen>
+    </TabScreen>
   );
 }
