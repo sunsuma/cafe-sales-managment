@@ -25,6 +25,68 @@ export function hourlySales(orders: Order[], day: Date) {
   );
   return arr;
 }
+export function salesTrend(
+  orders: Order[],
+  period: "Today" | "Weekly" | "Monthly",
+  date: Date,
+) {
+  if (period === "Today") {
+    return hourlySales(orders, date).map((value, hour) => ({
+      label:
+        hour === 0
+          ? "12a"
+          : hour < 12
+            ? hour % 6 === 0
+              ? `${hour}a`
+              : ""
+            : hour === 12
+              ? "12p"
+              : hour === 18
+                ? "6p"
+                : hour === 23
+                  ? "11p"
+                  : "",
+      value,
+    }));
+  }
+
+  if (period === "Weekly") {
+    const weekStart = startOfWeek(date);
+    return Array.from({ length: 7 }, (_, day) => {
+      const currentDay = new Date(weekStart);
+      currentDay.setDate(currentDay.getDate() + day);
+      const weekday = currentDay.toLocaleDateString("en-IN", {
+        weekday: "short",
+      });
+      return {
+        label: weekday,
+        value: paidSales(salesForDay(orders, currentDay)),
+      };
+    });
+  }
+
+  const monthStart = startOfMonth(date);
+  const daysInMonth = new Date(
+    monthStart.getFullYear(),
+    monthStart.getMonth() + 1,
+    0,
+  ).getDate();
+  const weekCount = Math.ceil(daysInMonth / 7);
+  const values = Array(weekCount).fill(0) as number[];
+  paidOrders(orders).forEach((order) => {
+    const paidDate = new Date(order.paidAt!);
+    if (
+      paidDate.getFullYear() === monthStart.getFullYear() &&
+      paidDate.getMonth() === monthStart.getMonth()
+    ) {
+      values[Math.floor((paidDate.getDate() - 1) / 7)] += order.totalAmount;
+    }
+  });
+  return values.map((value, week) => ({
+    label: `${week * 7 + 1}-${Math.min((week + 1) * 7, daysInMonth)}`,
+    value,
+  }));
+}
 export function bestSellers(orders: Order[]) {
   const m = new Map<
     string,

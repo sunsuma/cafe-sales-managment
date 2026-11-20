@@ -48,7 +48,7 @@ export default function EditItem() {
 
   return (
     <Screen>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <Heading title="Edit item" />
         <Card>
           <TouchableOpacity

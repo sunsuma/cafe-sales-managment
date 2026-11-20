@@ -47,7 +47,7 @@ export default function CreateOrder() {
 
   return (
     <Screen>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <Heading title="New order" sub="Select items and adjust quantities" />
         <Field
           label="ORDER DESCRIPTION (OPTIONAL)"

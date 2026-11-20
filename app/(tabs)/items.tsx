@@ -22,7 +22,10 @@ export default function Items() {
         title="＋  Create New Order"
         onPress={() => router.push("/orders/create")}
       />
-      <ScrollView style={{ flex: 1, marginTop: 15 }}>
+      <ScrollView
+        style={{ flex: 1, marginTop: 15 }}
+        showsVerticalScrollIndicator={false}
+      >
         {items.map((i) => (
           <Card key={i.id}>
             <View style={s.row}>

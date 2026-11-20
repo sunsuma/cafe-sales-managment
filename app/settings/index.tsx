@@ -198,6 +198,7 @@ export default function Settings() {
           </View>
 
           <ScrollView
+            showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ padding: 18, paddingBottom: 28 }}
           >

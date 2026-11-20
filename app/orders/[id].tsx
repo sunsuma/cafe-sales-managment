@@ -1,5 +1,5 @@
-import React from "react";
-import { ScrollView, Text, View, Alert } from "react-native";
+import React, { useRef } from "react";
+import { ScrollView, Text, View, Alert, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import {
   Screen,
@@ -18,6 +18,26 @@ export default function OrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const order = useCafeStore((state) => state.orders.find((item) => item.id === id));
   const setStatus = useCafeStore((state) => state.setStatus);
+  const markItemReady = useCafeStore((state) => state.markItemReady);
+  const unmarkItemReady = useCafeStore((state) => state.unmarkItemReady);
+  const lastTapRef = useRef<Record<string, number>>({});
+  const longPressHandledRef = useRef(false);
+
+  function handleItemPress(itemId: string) {
+    if (longPressHandledRef.current) {
+      longPressHandledRef.current = false;
+      return;
+    }
+
+    const now = Date.now();
+    const lastTap = lastTapRef.current[itemId] ?? 0;
+    if (now - lastTap < 300) {
+      lastTapRef.current[itemId] = 0;
+      unmarkItemReady(order!.id, itemId);
+    } else {
+      lastTapRef.current[itemId] = now;
+    }
+  }
 
   if (!order) {
     return (
@@ -29,7 +49,7 @@ export default function OrderDetail() {
 
   return (
     <Screen>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <Heading title="Order details" />
         <View
           style={{
@@ -75,23 +95,84 @@ export default function OrderDetail() {
           )}
         </Card>
         <Heading title="Purchased items" />
-        {order.items.map((item, index) => (
-          <Card key={index}>
-            <View style={s.row}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: "800", color: C.text }}>
-                  {item.itemName}
-                </Text>
-                <Text style={{ fontSize: 11, color: C.muted }}>
-                  {money(item.unitPrice)} × {item.quantity}
-                </Text>
-              </View>
-              <Text style={{ fontWeight: "800" }}>
-                {money(item.subtotal)}
-              </Text>
-            </View>
-          </Card>
-        ))}
+        {order.paymentStatus === "PENDING" && (
+          <Text
+            style={{
+              color: C.muted,
+              fontSize: 12,
+              marginTop: -10,
+              marginBottom: 10,
+            }}
+          >
+            Long press an item to mark one unit ready.
+          </Text>
+        )}
+        {order.items.map((item) => {
+          const quantity = Math.max(0, Math.floor(item.quantity));
+          const readyCount = Math.min(
+            quantity,
+            Math.max(
+              0,
+              Math.floor(order.readyQuantities?.[item.itemId] ?? 0),
+            ),
+          );
+          return (
+            <Pressable
+              key={item.itemId}
+              onPressIn={() => {
+                longPressHandledRef.current = false;
+              }}
+              onPress={() => handleItemPress(item.itemId)}
+              onLongPress={() => {
+                longPressHandledRef.current = true;
+                lastTapRef.current[item.itemId] = 0;
+                markItemReady(order.id, item.itemId);
+              }}
+              disabled={order.paymentStatus !== "PENDING"}
+              accessibilityRole="button"
+              accessibilityLabel={`${item.itemName}, ${readyCount} of ${quantity} ready`}
+              accessibilityHint="Long press to mark one unit ready"
+            >
+              <Card>
+                <View style={s.row}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontWeight: "800", color: C.text }}>
+                      {item.itemName}
+                    </Text>
+                    <Text style={{ fontSize: 11, color: C.muted }}>
+                      {money(item.unitPrice)} × {item.quantity}
+                    </Text>
+                    {order.paymentStatus === "PENDING" && readyCount > 0 && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginTop: 6,
+                        }}
+                      >
+                        {Array.from({ length: readyCount }, (_, index) => (
+                          <View
+                            key={index}
+                            style={{
+                              width: 9,
+                              height: 9,
+                              borderRadius: 5,
+                              backgroundColor: C.pending,
+                              marginRight: 5,
+                            }}
+                          />
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                  <Text style={{ fontWeight: "800" }}>
+                    {money(item.subtotal)}
+                  </Text>
+                </View>
+              </Card>
+            </Pressable>
+          );
+        })}
         <Card>
           <View style={s.row}>
             <Text style={{ color: C.muted }}>Total items</Text>

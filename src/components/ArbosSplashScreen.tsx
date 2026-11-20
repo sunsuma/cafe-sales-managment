@@ -119,7 +119,11 @@ export default function ArbosSplashScreen({ onFinish }: SplashScreenProps) {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     zIndex: 1,
     elevation: 10,
     backgroundColor: "#F40808",

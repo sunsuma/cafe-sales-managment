@@ -20,6 +20,8 @@ type State = {
   createOrder: (items: OrderItem[], description?: string) => Order;
   updateOrder: (id: string, items: OrderItem[], status: PaymentStatus, description?: string) => void;
   setStatus: (id: string, status: PaymentStatus) => void;
+  markItemReady: (orderId: string, itemId: string) => void;
+  unmarkItemReady: (orderId: string, itemId: string) => void;
   deleteOrder: (id: string) => void;
   setSettings: (x: Partial<CafeSettings>) => void;
   restore: (data: Pick<State, 'items' | 'orders' | 'settings'>) => void;
@@ -83,6 +85,17 @@ export const useCafeStore = create<State>()(
               ...o,
               description: description?.trim() ?? o.description,
               items,
+              readyQuantities: items.reduce<Record<string, number>>(
+                (ready, item) => {
+                  const count = Math.min(
+                    Math.floor(item.quantity),
+                    Math.max(0, Math.floor(o.readyQuantities?.[item.itemId] ?? 0)),
+                  );
+                  if (count > 0) ready[item.itemId] = count;
+                  return ready;
+                },
+                {},
+              ),
               totalQuantity: items.reduce((a, b) => a + b.quantity, 0),
               totalAmount: items.reduce((a, b) => a + b.subtotal, 0),
               paymentStatus: status,
@@ -109,6 +122,58 @@ export const useCafeStore = create<State>()(
                   updatedAt: new Date().toISOString(),
                 },
           ),
+        })),
+      markItemReady: (orderId, itemId) =>
+        set((s) => ({
+          orders: s.orders.map((order) => {
+            if (order.id !== orderId || order.paymentStatus !== 'PENDING') {
+              return order;
+            }
+
+            const item = order.items.find((line) => line.itemId === itemId);
+            if (!item) return order;
+
+            const quantity = Math.max(0, Math.floor(item.quantity));
+            const ready = Math.min(
+              quantity,
+              Math.max(0, Math.floor(order.readyQuantities?.[itemId] ?? 0)),
+            );
+            if (ready >= quantity) return order;
+
+            return {
+              ...order,
+              readyQuantities: {
+                ...order.readyQuantities,
+                [itemId]: ready + 1,
+              },
+            };
+          }),
+        })),
+      unmarkItemReady: (orderId, itemId) =>
+        set((s) => ({
+          orders: s.orders.map((order) => {
+            if (order.id !== orderId || order.paymentStatus !== 'PENDING') {
+              return order;
+            }
+
+            const item = order.items.find((line) => line.itemId === itemId);
+            if (!item) return order;
+
+            const quantity = Math.max(0, Math.floor(item.quantity));
+            const ready = Math.min(
+              quantity,
+              Math.max(0, Math.floor(order.readyQuantities?.[itemId] ?? 0)),
+            );
+            if (ready === 0) return order;
+
+            return {
+              ...order,
+              readyQuantities: {
+                ...order.readyQuantities,
+                [itemId]: ready - 1,
+              },
+            };
+          }),
         })),
       deleteOrder: (id) =>
         set((s) => ({

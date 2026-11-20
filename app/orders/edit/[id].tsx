@@ -55,7 +55,7 @@ export default function EditOrder() {
 
   return (
     <Screen>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <Heading title="Edit order" sub={order.orderNumber} />
         <Field
           label="ORDER DESCRIPTION (OPTIONAL)"

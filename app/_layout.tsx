@@ -9,7 +9,12 @@ export default function Layout() {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: isSplashVisible ? "#F40808" : C.bg,
+      }}
+    >
       <StatusBar
         style={isSplashVisible ? "light" : "dark"}
         backgroundColor={isSplashVisible ? "#F40808" : C.bg}
