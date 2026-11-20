@@ -1,4 +1,4 @@
-import { Order } from "../types/models";
+import { Order, OrderItem } from "../types/models";
 import { startOfDay, startOfWeek, startOfMonth } from "./dates";
 export const paidOrders = (orders: Order[]) =>
   orders.filter((o) => o.paymentStatus === "PAID" && !!o.paidAt);
@@ -10,6 +10,22 @@ export const pendingAmount = (orders: Order[]) =>
   pendingOrders(orders).reduce((s, o) => s + o.totalAmount, 0);
 export const paidItems = (orders: Order[]) =>
   paidOrders(orders).reduce((s, o) => s + o.totalQuantity, 0);
+export function allItemsReady(
+  items: OrderItem[],
+  readyQuantities?: Record<string, number>,
+) {
+  return (
+    items.length > 0 &&
+    items.every((item) => {
+      const quantity = Math.max(0, Math.floor(item.quantity));
+      const ready = Math.max(
+        0,
+        Math.floor(readyQuantities?.[item.itemId] ?? 0),
+      );
+      return quantity > 0 && ready >= quantity;
+    })
+  );
+}
 export function salesForDay(orders: Order[], day: Date) {
   const a = startOfDay(day).getTime(),
     b = a + 86400000;

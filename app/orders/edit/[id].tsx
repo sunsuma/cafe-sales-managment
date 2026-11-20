@@ -1,11 +1,20 @@
 import React, { useMemo, useState } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, Alert } from 'react-native';
+import {
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  Image,
+} from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Screen, Heading, Card, Btn, Field, s } from '../../../src/components/ui';
 import { useCafeStore } from '../../../src/store/useCafeStore';
 import { OrderItem } from '../../../src/types/models';
 import { money } from '../../../src/utils/currency';
 import { C } from '../../../src/constants/colors';
+import { allItemsReady } from '../../../src/utils/calculations';
 
 export default function EditOrder() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -49,6 +58,17 @@ export default function EditOrder() {
       Alert.alert('Order needs an item');
       return;
     }
+    if (
+      currentOrder.paymentStatus === 'PENDING' &&
+      status === 'PAID' &&
+      !allItemsReady(lines, currentOrder.readyQuantities)
+    ) {
+      Alert.alert(
+        'Items not ready',
+        'Mark each unit in every item as ready before marking this order as paid.',
+      );
+      return;
+    }
     update(currentOrder.id, lines, status, description);
     router.back();
   }
@@ -67,6 +87,21 @@ export default function EditOrder() {
           <Text style={{ fontWeight: '800', color: C.text, marginBottom: 10 }}>Current order items</Text>
           {lines.map((x) => (
             <View key={x.itemId} style={[s.row, { paddingVertical: 8 }]}>
+              {x.imageName && FileSystem.documentDirectory ? (
+                <Image
+                  source={{
+                    uri: `${FileSystem.documentDirectory}${x.imageName}`,
+                  }}
+                  accessibilityLabel={`${x.itemName} image`}
+                  resizeMode="cover"
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 10,
+                    marginRight: 8,
+                  }}
+                />
+              ) : null}
               <View style={{ flex: 1 }}>
                 <Text style={{ fontWeight: '700' }}>{x.itemName}</Text>
                 <Text style={{ fontSize: 11, color: C.muted }}>{money(x.unitPrice)} each</Text>
@@ -88,6 +123,21 @@ export default function EditOrder() {
             .filter((m) => !lines.some((x) => x.itemId === m.id))
             .map((m) => (
               <TouchableOpacity key={m.id} onPress={() => change(m.id, 1)} style={[s.row, { paddingVertical: 10 }]}>
+                {m.imageName && FileSystem.documentDirectory ? (
+                  <Image
+                    source={{
+                      uri: `${FileSystem.documentDirectory}${m.imageName}`,
+                    }}
+                    accessibilityLabel={`${m.name} image`}
+                    resizeMode="cover"
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: 10,
+                      marginRight: 8,
+                    }}
+                  />
+                ) : null}
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontWeight: '700' }}>{m.name}</Text>
                   <Text style={{ fontSize: 11, color: C.muted }}>{money(m.price)}</Text>

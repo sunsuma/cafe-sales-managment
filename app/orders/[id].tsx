@@ -21,6 +21,7 @@ import { useCafeStore } from "../../src/store/useCafeStore";
 import { money } from "../../src/utils/currency";
 import { C } from "../../src/constants/colors";
 import { fmtDate } from "../../src/utils/dates";
+import { allItemsReady } from "../../src/utils/calculations";
 
 export default function OrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -124,6 +125,8 @@ export default function OrderDetail() {
               Math.floor(order.readyQuantities?.[item.itemId] ?? 0),
             ),
           );
+          const visibleReadyCount =
+            order.paymentStatus === "PAID" ? quantity : readyCount;
           return (
             <Pressable
               key={item.itemId}
@@ -138,7 +141,7 @@ export default function OrderDetail() {
               }}
               disabled={order.paymentStatus !== "PENDING"}
               accessibilityRole="button"
-              accessibilityLabel={`${item.itemName}, ${readyCount} of ${quantity} ready`}
+              accessibilityLabel={`${item.itemName}, ${visibleReadyCount} of ${quantity} ready`}
               accessibilityHint="Long press to mark one unit ready"
             >
               <Card>
@@ -165,7 +168,7 @@ export default function OrderDetail() {
                     <Text style={{ fontSize: 11, color: C.muted }}>
                       {money(item.unitPrice)} × {item.quantity}
                     </Text>
-                    {order.paymentStatus === "PENDING" && readyCount > 0 && (
+                    {visibleReadyCount > 0 && (
                       <View
                         style={{
                           flexDirection: "row",
@@ -173,18 +176,24 @@ export default function OrderDetail() {
                           marginTop: 6,
                         }}
                       >
-                        {Array.from({ length: readyCount }, (_, index) => (
-                          <View
-                            key={index}
-                            style={{
-                              width: 9,
-                              height: 9,
-                              borderRadius: 5,
-                              backgroundColor: C.pending,
-                              marginRight: 5,
-                            }}
-                          />
-                        ))}
+                        {Array.from(
+                          { length: visibleReadyCount },
+                          (_, index) => (
+                            <View
+                              key={index}
+                              style={{
+                                width: 9,
+                                height: 9,
+                                borderRadius: 5,
+                                backgroundColor:
+                                  order.paymentStatus === "PAID"
+                                    ? C.paid
+                                    : C.pending,
+                                marginRight: 5,
+                              }}
+                            />
+                          ),
+                        )}
                       </View>
                     )}
                   </View>
@@ -214,6 +223,13 @@ export default function OrderDetail() {
           <Btn
             title="Mark as PAID"
             onPress={() => {
+              if (!allItemsReady(order.items, order.readyQuantities)) {
+                Alert.alert(
+                  "Items not ready",
+                  "Mark each unit in every item as ready before marking this order as paid.",
+                );
+                return;
+              }
               setStatus(order.id, "PAID");
               Alert.alert("Payment updated", "Order marked as paid.");
             }}
