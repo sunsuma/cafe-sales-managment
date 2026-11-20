@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from "react";
 import {
   Alert,
+  Image,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
 import { Screen, Heading, Card, Btn, Field, s } from "../../src/components/ui";
 import { useCafeStore } from "../../src/store/useCafeStore";
@@ -25,7 +27,7 @@ export default function CreateOrder() {
         .map((item) => ({
           itemId: item.id,
           itemName: item.name,
-          itemImage: item.imageUri,
+          imageName: item.imageName,
           unitPrice: item.price,
           quantity: qty[item.id],
           subtotal: item.price * qty[item.id],
@@ -58,6 +60,20 @@ export default function CreateOrder() {
         {items.map((item) => (
           <Card key={item.id}>
             <View style={s.row}>
+              {item.imageName && FileSystem.documentDirectory ? (
+                <Image
+                  source={{
+                    uri: `${FileSystem.documentDirectory}${item.imageName}`,
+                  }}
+                  resizeMode="cover"
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 10,
+                    marginRight: 10,
+                  }}
+                />
+              ) : null}
               <View style={{ flex: 1 }}>
                 <Text style={{ fontWeight: "800", color: C.text }}>
                   {item.name}

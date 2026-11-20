@@ -1,5 +1,13 @@
 import React, { useRef } from "react";
-import { ScrollView, Text, View, Alert, Pressable } from "react-native";
+import {
+  ScrollView,
+  Text,
+  View,
+  Alert,
+  Pressable,
+  Image,
+} from "react-native";
+import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, router } from "expo-router";
 import {
   Screen,
@@ -135,6 +143,21 @@ export default function OrderDetail() {
             >
               <Card>
                 <View style={s.row}>
+                  {item.imageName && FileSystem.documentDirectory ? (
+                    <Image
+                      source={{
+                        uri: `${FileSystem.documentDirectory}${item.imageName}`,
+                      }}
+                      accessibilityLabel={`${item.itemName} image`}
+                      resizeMode="cover"
+                      style={{
+                        width: 58,
+                        height: 58,
+                        borderRadius: 10,
+                        marginRight: 10,
+                      }}
+                    />
+                  ) : null}
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontWeight: "800", color: C.text }}>
                       {item.itemName}

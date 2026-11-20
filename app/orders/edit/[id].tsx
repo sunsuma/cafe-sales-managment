@@ -32,7 +32,7 @@ export default function EditOrder() {
       if (!found) {
         const item = menu.find((x) => x.id === itemId);
         if (!item) return old;
-        return [...old, { itemId: item.id, itemName: item.name, itemImage: item.imageUri, unitPrice: item.price, quantity: 1, subtotal: item.price }];
+        return [...old, { itemId: item.id, itemName: item.name, imageName: item.imageName, unitPrice: item.price, quantity: 1, subtotal: item.price }];
       }
       return old
         .map((x) =>

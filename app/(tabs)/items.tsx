@@ -1,5 +1,13 @@
 import React from "react";
-import { ScrollView, View, Text, TouchableOpacity, Alert } from "react-native";
+import {
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  Image,
+} from "react-native";
+import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
 import { TabScreen, Heading, Card, Btn, s } from "../../src/components/ui";
 import { useCafeStore } from "../../src/store/useCafeStore";
@@ -29,6 +37,21 @@ export default function Items() {
         {items.map((i) => (
           <Card key={i.id}>
             <View style={s.row}>
+              {i.imageName && FileSystem.documentDirectory ? (
+                <Image
+                  source={{
+                    uri: `${FileSystem.documentDirectory}${i.imageName}`,
+                  }}
+                  accessibilityLabel={`${i.name} image`}
+                  resizeMode="cover"
+                  style={{
+                    width: 58,
+                    height: 58,
+                    borderRadius: 10,
+                    marginRight: 10,
+                  }}
+                />
+              ) : null}
               <View style={{ flex: 1 }}>
                 <Text
                   style={{ fontWeight: "800", fontSize: 15, color: C.text }}

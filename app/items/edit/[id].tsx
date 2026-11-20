@@ -14,7 +14,7 @@ export default function EditItem() {
   const [name, setName] = useState(() => item?.name ?? '');
   const [price, setPrice] = useState(() => String(item?.price ?? ''));
   const [category, setCategory] = useState(() => item?.category ?? '');
-  const [image, setImage] = useState(() => item?.imageUri ?? '');
+  const [selectedImageUri, setSelectedImageUri] = useState<string>();
 
   if (!item) {
     return (
@@ -26,24 +26,34 @@ export default function EditItem() {
 
   async function pick() {
     const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
-    if (!r.canceled) setImage(r.assets[0].uri);
+    if (!r.canceled) setSelectedImageUri(r.assets[0].uri);
   }
 
   async function save() {
-    const currentItem = item!;
+    if (!item) {
+      Alert.alert('Item not found.');
+      return;
+    }
 
     if (!name.trim() || !category.trim() || Number(price) <= 0) {
       Alert.alert('Invalid details');
       return;
     }
 
-    let uri = image;
-    if (image && image !== currentItem.imageUri) {
-      uri = await makeImagePermanent(image);
+    try {
+      const imageName = selectedImageUri
+        ? await makeImagePermanent(selectedImageUri)
+        : item.imageName;
+      update(item.id, {
+        name: name.trim(),
+        price: Number(price),
+        category: category.trim(),
+        imageName,
+      });
+      router.back();
+    } catch (error) {
+      Alert.alert('Could not save item', String(error));
     }
-
-    update(currentItem.id, { name, price: Number(price), category, imageUri: uri });
-    router.back();
   }
 
   return (

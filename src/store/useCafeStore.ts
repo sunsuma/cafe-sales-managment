@@ -9,6 +9,7 @@ import {
   PaymentStatus,
 } from '../types/models';
 import { makeOrderNumber } from '../utils/orderId';
+import { migrateLegacyImage } from '../services/imageService';
 
 type State = {
   items: MenuItem[];
@@ -25,6 +26,19 @@ type State = {
   deleteOrder: (id: string) => void;
   setSettings: (x: Partial<CafeSettings>) => void;
   restore: (data: Pick<State, 'items' | 'orders' | 'settings'>) => void;
+};
+
+type LegacyMenuItem = Omit<MenuItem, 'imageName'> & {
+  imageName?: string;
+  imageUri?: string;
+};
+type LegacyOrderItem = Omit<OrderItem, 'imageName'> & {
+  imageName?: string;
+  itemImage?: string;
+};
+type LegacyPersistedState = Omit<Partial<State>, 'items' | 'orders'> & {
+  items?: LegacyMenuItem[];
+  orders?: Array<Omit<Order, 'items'> & { items: LegacyOrderItem[] }>;
 };
 
 export const useCafeStore = create<State>()(
@@ -193,7 +207,36 @@ export const useCafeStore = create<State>()(
     {
       name: 'cafe-sales-local-v1',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 1,
+      version: 2,
+      migrate: async (persistedState, version) => {
+        if (version >= 2) return persistedState as State;
+
+        const state = persistedState as LegacyPersistedState;
+        const items = await Promise.all(
+          (state.items ?? []).map(async (item) => {
+            const { imageUri, ...savedItem } = item;
+            const imageName =
+              item.imageName ??
+              (imageUri ? await migrateLegacyImage(imageUri) : undefined);
+            return { ...savedItem, ...(imageName ? { imageName } : {}) };
+          }),
+        );
+        const orders = await Promise.all(
+          (state.orders ?? []).map(async (order) => ({
+            ...order,
+            items: await Promise.all(
+              order.items.map(async (item) => {
+                const { itemImage, ...savedItem } = item;
+                const imageName =
+                  item.imageName ??
+                  (itemImage ? await migrateLegacyImage(itemImage) : undefined);
+                return { ...savedItem, ...(imageName ? { imageName } : {}) };
+              }),
+            ),
+          })),
+        );
+        return { ...state, items, orders } as State;
+      },
     },
   ),
 );

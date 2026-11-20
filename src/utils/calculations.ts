@@ -102,7 +102,7 @@ export function bestSellers(orders: Order[]) {
     o.items.forEach((i) => {
       const x = m.get(i.itemId) || {
         name: i.itemName,
-        image: i.itemImage,
+        image: i.imageName,
         price: i.unitPrice,
         qty: 0,
         revenue: 0,
