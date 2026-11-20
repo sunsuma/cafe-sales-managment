@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { ScrollView, Alert, Text, TouchableOpacity } from 'react-native';
+import {
+  ScrollView,
+  Alert,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Screen, Heading, Card, Field, Btn } from '../../../src/components/ui';
@@ -23,6 +31,12 @@ export default function EditItem() {
       </Screen>
     );
   }
+
+  const previewUri =
+    selectedImageUri ??
+    (item.imageName && FileSystem.documentDirectory
+      ? `${FileSystem.documentDirectory}${item.imageName}`
+      : undefined);
 
   async function pick() {
     const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
@@ -63,14 +77,69 @@ export default function EditItem() {
         <Card>
           <TouchableOpacity
             onPress={pick}
+            accessibilityRole="button"
+            accessibilityLabel={
+              previewUri ? 'Replace item image' : 'Choose item image'
+            }
             style={{
-              padding: 18,
+              height: 160,
               backgroundColor: '#F0EBE4',
               borderRadius: 12,
               alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 15,
+              overflow: 'hidden',
             }}
           >
-            <Text style={{ color: '#2E7D5B', fontWeight: '700' }}>Change item image</Text>
+            {previewUri ? (
+              <>
+                <Image
+                  source={{ uri: previewUri }}
+                  resizeMode="cover"
+                  accessible={false}
+                  style={{ width: '100%', height: '100%' }}
+                />
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(255,255,255,0.92)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 26, color: '#2E7D5B' }}>＋</Text>
+                </View>
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    bottom: 10,
+                    alignSelf: 'center',
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                    backgroundColor: 'rgba(0,0,0,0.55)',
+                  }}
+                >
+                  <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>
+                    Tap + to replace image
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={{ fontSize: 28 }}>＋</Text>
+                <Text style={{ color: '#2E7D5B', fontWeight: '700' }}>
+                  Choose item image
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
           <Field label="ITEM NAME" value={name} onChangeText={setName} />
           <Field label="PRICE (₹)" value={price} onChangeText={setPrice} keyboardType="decimal-pad" />

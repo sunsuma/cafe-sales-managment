@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Alert, ScrollView, Text, TouchableOpacity } from 'react-native';
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { Screen, Heading, Card, Field, Btn } from '../../src/components/ui';
@@ -58,18 +65,69 @@ export default function AddItem() {
         <Card>
           <TouchableOpacity
             onPress={pickImage}
+            accessibilityRole="button"
+            accessibilityLabel={
+              imageUri ? 'Replace selected item image' : 'Choose item image'
+            }
             style={{
-              padding: 18,
+              height: 160,
               backgroundColor: '#F0EBE4',
               borderRadius: 12,
               alignItems: 'center',
+              justifyContent: 'center',
               marginBottom: 15,
+              overflow: 'hidden',
             }}
           >
-            <Text style={{ fontSize: 28 }}>＋</Text>
-            <Text style={{ fontWeight: '700', color: '#2E7D5B' }}>
-              {imageUri ? 'Change selected image' : 'Choose item image'}
-            </Text>
+            {imageUri ? (
+              <>
+                <Image
+                  source={{ uri: imageUri }}
+                  resizeMode="cover"
+                  accessible={false}
+                  style={{ width: '100%', height: '100%' }}
+                />
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(255,255,255,0.92)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 26, color: '#2E7D5B' }}>＋</Text>
+                </View>
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    bottom: 10,
+                    alignSelf: 'center',
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                    backgroundColor: 'rgba(0,0,0,0.55)',
+                  }}
+                >
+                  <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>
+                    Tap + to replace image
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={{ fontSize: 28 }}>＋</Text>
+                <Text style={{ fontWeight: '700', color: '#2E7D5B' }}>
+                  Choose item image
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
           <Field
             label="ITEM NAME"
